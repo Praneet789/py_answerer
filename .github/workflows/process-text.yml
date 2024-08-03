@@ -1,0 +1,53 @@
+name: Process Clipboard Text
+
+on:
+  push:
+    paths:
+      - text_input.txt
+
+jobs:
+  process-text:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install google-generativeai
+
+    - name: Process text with Gemini
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        import google.generativeai as genai
+        import json
+        import os
+
+        API_KEY = os.getenv("GEMINI_API_KEY")
+        genai.configure(api_key=API_KEY)
+
+        model = genai.GenerativeModel('gemini-1.5-flash')
+
+        with open('text_input.txt', 'r') as file:
+            prompt = file.read().strip()
+
+        response = model.generate_content(prompt)
+        result = response.text.strip()
+
+        with open('text_output.json', 'w') as file:
+            json.dump({"response": result}, file)
+
+    - name: Commit and push result
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add text_output.json
+        git commit -m 'Update response'
+        git push
