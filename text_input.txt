@@ -1,0 +1,1 @@
+s selected text. Displays the response in a browser notification.
