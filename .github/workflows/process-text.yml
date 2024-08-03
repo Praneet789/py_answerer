@@ -38,11 +38,20 @@ jobs:
         with open('text_input.txt', 'r') as file:
             prompt = file.read().strip()
 
-        response = model.generate_content(prompt)
-        result = response.text.strip()
+        print(f"Prompt: {prompt}")
+
+        try:
+            response = model.generate_content(prompt)
+            result = response.text.strip()
+            print(f"Response: {result}")
+        except Exception as e:
+            print(f"Error generating content: {e}")
+            result = f"Error: {e}"
 
         with open('text_output.json', 'w') as file:
             json.dump({"response": result}, file)
+
+        print("text_output.json created successfully")
 
     - name: Commit and push result
       run: |
